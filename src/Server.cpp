@@ -1,4 +1,7 @@
-#include "bCAPServerSample.h"
+/*
+ *
+ */
+#include "rc8server.h"
 
 
 /***************/
@@ -68,7 +71,8 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerGetTask", vntArgs, Argc);
   std::string name(convToStr(vntArgs[1].bstrVal));
-  std::vector<std::string> f_list=GetTaskNames("config/scripts");
+  std::string cwd(std::getenv("RC8SERVER_DIR"));
+  std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
   ///
   vntRet->vt = VT_I4;
@@ -100,7 +104,8 @@ ControllerGetTaskNames(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   BSTR* pData;
   print_args("ControllerGetTaskNames", vntArgs, Argc);
 
-  std::vector<std::string> f_list=GetTaskNames("config/scripts");
+  std::string cwd(std::getenv("RC8SERVER_DIR"));
+  std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
   vntRet->vt = VT_BSTR | VT_ARRAY;
   vntRet->parray = SafeArrayCreateVector(VT_BSTR, 0L, (int)f_list.size());
@@ -418,16 +423,18 @@ main(void)
   int fd = 0;
   HRESULT hr;
 
+  std::string cwd(std::getenv("RC8SERVER_DIR"));
+
   SetCallFunctions();
-  load_int_value("config/int_val.csv");
-  load_float_value("config/float_val.csv");
+  load_int_value(cwd+"config/int_val.csv");
+  load_float_value(cwd+"config/float_val.csv");
 
   hr = bCap_Open_Server("tcp", 1000, &fd);
   if (SUCCEEDED(hr)) {
     getchar();
     bCap_Close_Server(&fd);
   }
-  save_int_value("config/int_val.csv");
-  save_float_value("config/float_val.csv");
+  save_int_value(cwd+"config/int_val.csv");
+  save_float_value(cwd+"config/float_val.csv");
   return 0;
 }

@@ -1,14 +1,17 @@
-#include "bCAPServerSample.h"
+/*
+ *
+ */
+#include "rc8server.h"
 #include <cstdlib>
 #include <dirent.h>
 
 
 std::vector<std::string>
-GetTaskNames(const char*path)
+GetTaskNames(std::string path)
 {
     std::vector<std::string>lst;
     DIR *dp;
-    dp=opendir(path);
+    dp=opendir(path.c_str());
     if(dp==NULL) { return lst; }
     dirent * entry = readdir(dp);
     while (entry != NULL){

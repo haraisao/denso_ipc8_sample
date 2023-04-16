@@ -1,5 +1,7 @@
-
-#include "bCAPServerSample.h"
+/*
+ *
+ */
+#include "rc8server.h"
 
 #include <yaml-cpp/yaml.h>
 #include <fstream>

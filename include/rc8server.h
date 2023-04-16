@@ -49,7 +49,7 @@ void save_float_value(std::string fname);
 void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);
 
 /** */
-std::vector<std::string> GetTaskNames(const char*path);
+std::vector<std::string> GetTaskNames(std::string path);
 
 /** NotUseFunc */
 HRESULT ControllerGetExtension(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet);

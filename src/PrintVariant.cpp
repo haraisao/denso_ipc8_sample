@@ -1,4 +1,7 @@
-#include "bCAPServerSample.h"
+/*
+ *
+ */
+#include "rc8server.h"
 
 void
 print_variant(VARIANT *vnt, int depth)

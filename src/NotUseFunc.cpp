@@ -1,4 +1,7 @@
-#include "bCAPServerSample.h"
+/*
+ *
+ */
+#include "rc8server.h"
 
 
 HRESULT

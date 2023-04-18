@@ -437,7 +437,14 @@ main(void)
   int fd = 0;
   HRESULT hr;
 
-  std::string cwd(std::getenv("RC8SERVER_DIR"));
+  std::cerr << "--- start " << std::endl;
+  char *dir_ = std::getenv("RC8SERVER_DIR");
+  std::string cwd;
+  if (dir_){
+    cwd = std::string(dir_);
+  }else{
+    cwd = std::string("/usr/local/rc8server/");
+  }
 
   SetCallFunctions();
   load_int_value(cwd+"config/int_val.csv");

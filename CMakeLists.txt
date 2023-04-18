@@ -38,7 +38,7 @@ install(TARGETS ${PROJECT_NAME}
 	DESTINATION ${PROJECT_NAME}/bin
 )
 
-install(FILES  scripts/start.sh
+install(PROGRAMS  scripts/start.sh
 	DESTINATION ${PROJECT_NAME}/bin
 )
 

@@ -17,7 +17,7 @@ GetTaskNames(std::string path)
     while (entry != NULL){
         if(entry != NULL){
             std::string name(entry->d_name);
-            auto pos=name.find(".scr");
+            auto pos=name.find(".pcs");
             if (pos != std::string::npos){
               lst.push_back(name.substr(0, pos));
             }

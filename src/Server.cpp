@@ -23,24 +23,27 @@ char *convToStr(BSTR bstr)
 }
 
 /**************/
-static HRESULT
+HRESULT
 ServiceStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ServiceStart", vntArgs, Argc);
+  std::cerr << "ServiceStart ==>" << std::endl;
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ServiceStop(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ServiceStop", vntArgs, Argc);
+  std::cerr << "<== ServiceStop" << std::endl;
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ControllerConnect(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerConnect", vntArgs, Argc);
+  std::cerr << "ControllerConnect ==>" << std::endl;
 
   vntRet->vt = VT_I4;
   vntRet->lVal = 1L;
@@ -48,17 +51,19 @@ ControllerConnect(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ControllerDisconnect(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerDisconnect", vntArgs, Argc);
+  std::cerr << "<== ControllerDisconnect" << std::endl;
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ControllerGetRobot(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerGetRobot", vntArgs, Argc);
+  std::cerr << "ControllerGetRobot ==>" << std::endl;
   ////
   vntRet->vt = VT_I4;
   vntRet->lVal = 4L;
@@ -66,7 +71,7 @@ ControllerGetRobot(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerGetTask", vntArgs, Argc);
@@ -74,6 +79,7 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   std::string cwd(std::getenv("RC8SERVER_DIR"));
   std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
+  std::cerr << "ControllerGetTask: " << name << std::endl;
   ///
   vntRet->vt = VT_I4;
   vntRet->lVal = 5L;
@@ -83,7 +89,7 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ControllerGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerGetVariable", vntArgs, Argc);
@@ -97,12 +103,14 @@ ControllerGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 
 
 
-static HRESULT
+HRESULT
 ControllerGetTaskNames(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // T.B.D
   BSTR* pData;
   print_args("ControllerGetTaskNames", vntArgs, Argc);
+
+  std::cerr << "ControllerGetTaskNames" << std::endl;
 
   std::string cwd(std::getenv("RC8SERVER_DIR"));
   std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
@@ -120,7 +128,7 @@ ControllerGetTaskNames(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 ControllerExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   //T.B.D
@@ -145,7 +153,7 @@ ControllerExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 }
 
 
-static HRESULT
+HRESULT
 RobotGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("RobotGetVariable", vntArgs, Argc);
@@ -157,18 +165,16 @@ RobotGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 
 }
 
-static HRESULT
+HRESULT
 RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("RobotExecute", vntArgs, Argc);
   // TakeArm, GiveArm, Motor, ExtSpeed, OutRange, CurPos, CurJnt, CurFig
   std::string cmd(convToStr(vntArgs[1].bstrVal));
-  std::cerr << cmd << std::endl;
     
   if (cmd == "ExtSpeed"){
-    vntRet->vt = VT_R4;
-    vntRet->fltVal = 10.0;
     get_variable_value( (16 & ROBOT_VAL), vntRet);
+    std::cerr << "ExtSpeed:" << vntRet->fltVal << std::endl;
 
   }else{
     std::cerr << cmd << std::endl;
@@ -176,24 +182,26 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 RobotMove(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("RobotMove", vntArgs, Argc);
   // T.B.D
+  std::cerr << "RobotMove:" << std::endl;
 
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 RobotRelease(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("RobotRelease", vntArgs, Argc);
+  std::cerr << "<== RobotRelease" << std::endl;
 
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 TaskGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // Not use
@@ -206,49 +214,55 @@ TaskGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 
 }
 
-static HRESULT
+HRESULT
 TaskExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("TaskExecute", vntArgs, Argc);
   // GetStatus
   std::string cmd(convToStr(vntArgs[1].bstrVal));
-  std::cerr << cmd << std::endl;
   if(cmd == "GetStatus"){
     vntRet->vt = VT_I4;
     vntRet->lVal = 2L;  // 0: Not exists, 1: Suspend, 2: Ready, 3: Running, 4: StepStop
+    std::cerr << "TaskExecute: GetStatus" << std::endl;
+  }else{
+    std::cerr << cmd << std::endl;
   }
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 TaskStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // T.B.D
   print_args("TaskStart", vntArgs, Argc);
+  std::string name(convToStr(vntArgs[1].bstrVal));
+  std::cerr << "TaskStart: " << name << std::endl;
 
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 TaskStop(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // T.B.D
   print_args("TaskStop", vntArgs, Argc);
+  std::cerr << "TaskStop " <<  std::endl;
 
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 TaskRelease(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // T.B.D
   print_args("TaskRelease", vntArgs, Argc);
+  std::cerr << "<== TaskRelease" <<  std::endl;
 
   return S_OK;
 }
 
 
-static HRESULT
+HRESULT
 VariableGetValue(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("VariableGetValue", vntArgs, Argc);
@@ -258,7 +272,7 @@ VariableGetValue(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-static HRESULT
+HRESULT
 VariablePutValue(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("VariablePutValue", vntArgs, Argc);
@@ -267,14 +281,14 @@ VariablePutValue(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 }
 
 
-static HRESULT
+HRESULT
 VariableRelease(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("VariableRelease", vntArgs, Argc);
   return S_OK;
 }
 
-static void
+void
 SetCallFunctions()
 {
   bCap_SetCallFunc(ID_SERVICE_START, &ServiceStart);

@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(rc8server)
 
-add_compile_options( -Wno-write-strings -fcompare-debug-second )
+add_compile_options( -Wno-write-strings -fcompare-debug-second -g)
 
 find_package(yaml-cpp REQUIRED)
 

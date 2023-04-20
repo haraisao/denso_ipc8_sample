@@ -18,6 +18,7 @@ char *convToStr(BSTR bstr)
   size_t i;
   std::wstring ws(bstr);
   char *buffer=new char[ws.length() +1];
+  memset(buffer,0, ws.length() +1);
   wcstombs(buffer, ws.c_str(), ws.size());
   return buffer;
 }
@@ -76,7 +77,13 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("ControllerGetTask", vntArgs, Argc);
   std::string name(convToStr(vntArgs[1].bstrVal));
-  std::string cwd(std::getenv("RC8SERVER_DIR"));
+  std::string cwd;
+  char *dir_ = std::getenv("RC8SERVER_DIR");
+  if (dir_){
+    cwd = std::string(dir_);
+  }else{
+    cwd = std::string("/usr/local/rc8server/");
+  }
   std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
   std::cerr << "ControllerGetTask: " << name << std::endl;
@@ -112,7 +119,13 @@ ControllerGetTaskNames(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 
   std::cerr << "ControllerGetTaskNames" << std::endl;
 
-  std::string cwd(std::getenv("RC8SERVER_DIR"));
+  std::string cwd;
+  char *dir_ = std::getenv("RC8SERVER_DIR");
+  if (dir_){
+    cwd = std::string(dir_);
+  }else{
+    cwd = std::string("/usr/local/rc8server/");
+  }
   std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
   vntRet->vt = VT_BSTR | VT_ARRAY;
@@ -146,7 +159,7 @@ ControllerExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
     vntRet->lVal = 0L;
 
   }else{
-    std::cerr << cmd << std::endl;
+    std::cerr << "ControllerExecute:" <<  cmd << std::endl;
   }
   
   return S_OK;
@@ -177,7 +190,7 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
     std::cerr << "ExtSpeed:" << vntRet->fltVal << std::endl;
 
   }else{
-    std::cerr << cmd << std::endl;
+    std::cerr << "RobotExecute:"  <<cmd << std::endl;
   }
   return S_OK;
 }
@@ -225,7 +238,7 @@ TaskExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
     vntRet->lVal = 2L;  // 0: Not exists, 1: Suspend, 2: Ready, 3: Running, 4: StepStop
     std::cerr << "TaskExecute: GetStatus" << std::endl;
   }else{
-    std::cerr << cmd << std::endl;
+    std::cerr << "TaskExecite   " << cmd << std::endl;
   }
   return S_OK;
 }
@@ -235,8 +248,7 @@ TaskStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // T.B.D
   print_args("TaskStart", vntArgs, Argc);
-  std::string name(convToStr(vntArgs[1].bstrVal));
-  std::cerr << "TaskStart: " << name << std::endl;
+  std::cerr << "TaskStart: " << std::endl;
 
   return S_OK;
 }

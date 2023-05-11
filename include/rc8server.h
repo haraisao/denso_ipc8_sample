@@ -48,8 +48,9 @@ void save_float_value(std::string fname);
 /** PrintVariant***/
 void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);
 
-/** */
+/** file System*/
 std::vector<std::string> GetTaskNames(std::string path);
+int ReadTaskTime(std::string name);
 
 /** NotUseFunc */
 HRESULT ControllerGetExtension(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet);

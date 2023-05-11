@@ -14,7 +14,7 @@
  * Variables
  */
 int32_t I_Values[100]={
-	  0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,
@@ -178,7 +178,7 @@ void
 save_int_value(std::string fname){
   std::vector<std::string> val;
   for(int i=0; i<100;i++){
-    val.push_back(std::to_string(I_Values[i++]));
+    val.push_back(std::to_string(I_Values[i]));
   }
   save_csv_file(fname, val);
   std::cerr << "save_int_value: " << fname << std::endl;
@@ -189,7 +189,7 @@ void
 save_float_value(std::string fname){
   std::vector<std::string> val;
   for(int i=0; i<100;i++){
-    val.push_back(std::to_string(F_Values[i++]));
+    val.push_back(std::to_string(F_Values[i]));
   }
   save_csv_file(fname, val);
   std::cerr << "save_float_value: " << fname << std::endl;

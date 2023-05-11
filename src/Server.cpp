@@ -3,6 +3,8 @@
  */
 #include "rc8server.h"
 
+static int task_sleep_time=0;
+static int task_status=0;
 
 /***************/
 BSTR convToBstr(const std::string& input)
@@ -21,6 +23,16 @@ char *convToStr(BSTR bstr)
   memset(buffer,0, ws.length() +1);
   wcstombs(buffer, ws.c_str(), ws.size());
   return buffer;
+}
+
+void msleep(int msec)
+{
+  if(msec < 0) return;
+  int sec = msec / 1000;
+  int usec = (msec % 1000) * 1000;
+  sleep(sec);
+  usleep(usec);
+  return;
 }
 
 /**************/
@@ -86,12 +98,18 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   }
   std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
+
   std::cerr << "ControllerGetTask: " << name << std::endl;
+  int val=ReadTaskTime(name);
+
+  if (val < 0){ return HRESULT(-1); }
+
+  task_sleep_time=val;
+  task_status=2;
   ///
   vntRet->vt = VT_I4;
   vntRet->lVal = 5L;
   /// T.B.D.
- 
 
   return S_OK;
 }
@@ -235,7 +253,7 @@ TaskExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   std::string cmd(convToStr(vntArgs[1].bstrVal));
   if(cmd == "GetStatus"){
     vntRet->vt = VT_I4;
-    vntRet->lVal = 2L;  // 0: Not exists, 1: Suspend, 2: Ready, 3: Running, 4: StepStop
+    vntRet->lVal = task_status;  // 0: Not exists, 1: Suspend, 2: Ready, 3: Running, 4: StepStop
     std::cerr << "TaskExecute: GetStatus" << std::endl;
   }else{
     std::cerr << "TaskExecite   " << cmd << std::endl;
@@ -249,6 +267,10 @@ TaskStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   // T.B.D
   print_args("TaskStart", vntArgs, Argc);
   std::cerr << "TaskStart: " << std::endl;
+
+  task_status=3;
+  msleep(task_sleep_time);
+  task_status=2;
 
   return S_OK;
 }
@@ -269,6 +291,8 @@ TaskRelease(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   // T.B.D
   print_args("TaskRelease", vntArgs, Argc);
   std::cerr << "<== TaskRelease" <<  std::endl;
+  task_sleep_time=0;
+  task_status=0;
 
   return S_OK;
 }

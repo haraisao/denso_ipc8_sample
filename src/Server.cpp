@@ -98,9 +98,8 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   }
   std::vector<std::string> f_list=GetTaskNames(cwd+"config/scripts");
 
-
-  std::cerr << "ControllerGetTask: " << name << std::endl;
-  int val=ReadTaskTime(name);
+  int val = ReadTaskTime(name);
+  std::cerr << "ControllerGetTask: " << name << "(" << val << ")" << std::endl;
 
   if (val < 0){ return HRESULT(-1); }
 
@@ -467,11 +466,28 @@ SetCallFunctions()
   bCap_SetCallFunc(ID_MESSAGE_RELEASE, &MessageRelease);
 }
 
+/*****/
+int fd = 0;
+
+void sig_handler(int signum) {
+  fprintf(stderr, "==== Catch Signal Ctrl-C\n");
+  bCap_Close_Server(&fd);
+  return;
+}
+
+/**
+ *
+ *
+ */
 int
 main(void)
 {
-  int fd = 0;
   HRESULT hr;
+
+  if (signal(SIGINT, sig_handler) == SIG_ERR) {
+     std::cerr << "===== Signal Error =====" << std::endl;
+     exit(1);
+  }
 
   std::cerr << "--- start " << std::endl;
   char *dir_ = std::getenv("RC8SERVER_DIR");
@@ -488,8 +504,9 @@ main(void)
 
   hr = bCap_Open_Server("tcp", 1000, &fd);
   if (SUCCEEDED(hr)) {
-    getchar();
-    bCap_Close_Server(&fd);
+    while(fd){
+      usleep(300000);
+    }
   }
   save_int_value(cwd+"config/int_val.csv");
   save_float_value(cwd+"config/float_val.csv");

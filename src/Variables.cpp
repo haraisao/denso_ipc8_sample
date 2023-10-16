@@ -2,9 +2,13 @@
  *
  */
 #include "rc8server.h"
-
+#include <stdlib.h>
 #include <yaml-cpp/yaml.h>
+
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <iomanip>
 
 
 
@@ -41,7 +45,10 @@ VARIANT ControllerValues[]={
    {VT_I4, 0}, {VT_I4, 0}, {VT_I4, 0}, {VT_I4, 0}, 
    {VT_I4, 3}, {VT_BOOL, 0}, {VT_I4, 0}, {VT_DATE, 0}, {VT_BOOL, 0}, 
    {VT_BOOL, 0}, {VT_BOOL, 1}, 
-   {VT_I8, 0}, {VT_BSTR, .bstrVal=ErrorCode},  {VT_BSTR, 0}, {VT_BOOL, 0},
+   {VT_I8, 0},
+   //{VT_BSTR, .bstrVal=ErrorCode},
+   {VT_BSTR, 0},
+   {VT_BSTR, 0}, {VT_BOOL, 0},
    {VT_BOOL, 0}, {VT_BOOL, 1}, {VT_BSTR, 0}, {VT_BSTR, 0}, {VT_BSTR, 0}, 
    {VT_BSTR, 0}, {VT_BOOL, 0} 
  };
@@ -195,6 +202,21 @@ save_float_value(std::string fname){
   std::cerr << "save_float_value: " << fname << std::endl;
   return;
 }
+
+wchar_t* convToWString(const std::string& in)
+{
+  wchar_t* buffer = new wchar_t[in.size() +1];
+  mbstowcs(buffer, in.c_str(), in.size());
+  return buffer;
+}
+
+wchar_t *intToWstring(int v)
+{
+  std::ostringstream ss;
+  ss << std::setw(8) << std::setfill('0') << std::hex << v;
+  return convToWString(ss.str());
+}
+
 /**************************************/
 HRESULT
 get_controller_variable_handle(int32_t *handle, BSTR bstr)
@@ -274,7 +296,14 @@ get_variable_value(int32_t h, VARIANT *v)
 
   }else if(h & CTRL_VAL){
     h = GET_HANDLE(h);
-    VariantCopy(v, ControllerValues+h);
+
+    if (h == 18){
+      int code = (ControllerValues+17)->lVal;
+      v->vt = VT_BSTR;
+      v->bstrVal = intToWstring(code);
+    }else{
+      VariantCopy(v, ControllerValues+h);
+    }
 
   }else if(h & ROBOT_VAL){
     h = GET_HANDLE(h);
@@ -311,6 +340,12 @@ put_variable_value(int32_t h, VARIANT v)
   }else if(h & CTRL_VAL){
     h = GET_HANDLE(h);
     VariantCopy(ControllerValues+h, &v);
+
+    if (h == 17 && v.lVal == 0){
+      VARIANT val2 = {VT_BSTR, 0};
+      VariantCopy(ControllerValues+19, &val2);
+    }
+   
 
   }else if(h & ROBOT_VAL){
     h = GET_HANDLE(h);

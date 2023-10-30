@@ -271,6 +271,7 @@ TaskStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   msleep(task_sleep_time);
   task_status=2;
 
+  std::cerr << "TaskStart: END" << std::endl;
   return S_OK;
 }
 

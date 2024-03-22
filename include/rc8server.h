@@ -51,7 +51,12 @@ void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);
 
 /** file System*/
 std::vector<std::string> GetTaskNames(std::string path);
-int ReadTaskTime(std::string name);
+//int ReadTaskTime(std::string name);
+int ReadTaskTime(std::vector<std::string>f_list, std::string name);
+
+int GetTaskTime(std::string name);
+void LoadTaskList();
+
 
 /** NotUseFunc */
 HRESULT ControllerGetExtension(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet);

@@ -8,7 +8,7 @@ add_compile_options( -Wno-write-strings -fcompare-debug-second -g)
 find_package(yaml-cpp REQUIRED)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orin_bcap.cmake)
-
+message("ORIN_SERVER_LIB: ${ORIN_SERVER_LIBRARIES}")
 #
 include_directories(
   ${ORIN_INCLUDE_PATH}

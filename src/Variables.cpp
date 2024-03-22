@@ -9,8 +9,8 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
-
-
+#include <locale>
+#include <codecvt>
 
 #define GET_HANDLE(h)    (h & 0x0ff)
 
@@ -122,6 +122,11 @@ load_param_file(const char *fname)
 }
 #endif
 
+std::string ConvertWstringToUTF8(std::wstring& src) {
+  std::wstring_convert<std::codecvt_utf8<wchar_t> > converter;
+  return converter.to_bytes(src);
+}
+
 std::vector<std::string>
 load_csv_file(std::string fname)
 {
@@ -147,7 +152,9 @@ load_int_value(std::string fname)
   auto v = load_csv_file(fname);
   int i=0;
   std::for_each(v.begin(), v.end(), [&i](const std::string& x) {
-    if (i < 100){  I_Values[i++] = std::stoi(x); }
+    if (i < 100){
+      I_Values[i++] = std::stoi(x);
+    }
   });
   return;
 }
@@ -233,12 +240,24 @@ get_controller_variable_handle(int32_t *handle, BSTR bstr)
     }
 
   }else if(name.compare(0,1, L"I")==0){
-    val=std::stoi(name.substr(1));
-    val |= I_VAL;
+    try{
+      val=std::stoi(name.substr(1));
+      val |= I_VAL;
+    }catch(...){
+      std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
+	       << std::endl;
+      return -1;
+    }
 
   }else if(name.compare(0,1, L"F")==0){
-    val=std::stoi(name.substr(1));
-    val |= F_VAL;
+    try{
+      val=std::stoi(name.substr(1));
+      val |= F_VAL;
+    }catch(...){
+      std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
+	      << std::endl;
+      return -1;
+    }
   }
   *handle = val;
 

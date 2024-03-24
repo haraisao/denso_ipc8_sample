@@ -102,8 +102,9 @@ ControllerGetTask(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   */
   int val = GetTaskTime(name);
   //int val = ReadTaskTime(f_list, name);
-
+#if DEBUG
   std::cerr << "ControllerGetTask: " << name << "(" << val << ")" << std::endl;
+#endif
 
   if (val < 0){ return HRESULT(-1); }
 
@@ -137,8 +138,9 @@ ControllerGetTaskNames(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   // T.B.D
   BSTR* pData;
   print_args("ControllerGetTaskNames", vntArgs, Argc);
-
+#if DEBUG
   std::cerr << "ControllerGetTaskNames" << std::endl;
+#endif
 
   std::string cwd;
   char *dir_ = std::getenv("RC8SERVER_DIR");
@@ -209,7 +211,9 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
     
   if (cmd == "ExtSpeed"){
     get_variable_value( (16 & ROBOT_VAL), vntRet);
+#if DEBUG
     std::cerr << "ExtSpeed:" << vntRet->fltVal << std::endl;
+#endif
 
   }else{
     std::cerr << "RobotExecute:"  <<cmd << std::endl;
@@ -258,7 +262,9 @@ TaskExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   if(cmd == "GetStatus"){
     vntRet->vt = VT_I4;
     vntRet->lVal = task_status;  // 0: Not exists, 1: Suspend, 2: Ready, 3: Running, 4: StepStop
+#if DEBUG
     std::cerr << "TaskExecute: GetStatus" << std::endl;
+#endif
   }else{
     std::cerr << "TaskExecite   " << cmd << std::endl;
   }
@@ -270,13 +276,15 @@ TaskStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   // T.B.D
   print_args("TaskStart", vntArgs, Argc);
+#if DEBUG
   std::cerr << "TaskStart: " << std::endl;
-
+#endif
   task_status=3;
   msleep(task_sleep_time);
   task_status=2;
-
+#if DEBUG
   std::cerr << "TaskStart: END" << std::endl;
+#endif
   return S_OK;
 }
 

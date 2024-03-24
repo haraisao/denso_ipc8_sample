@@ -148,7 +148,9 @@ load_csv_file(std::string fname)
 void
 load_int_value(std::string fname)
 {
+#if DEBUG
   std::cerr << "load_int_value: " << fname << std::endl;
+#endif
   auto v = load_csv_file(fname);
   int i=0;
   std::for_each(v.begin(), v.end(), [&i](const std::string& x) {
@@ -162,7 +164,9 @@ load_int_value(std::string fname)
 void
 load_float_value(std::string fname)
 {
+#if DEBUG
   std::cerr << "load_float_value: " << fname << std::endl;
+#endif
   auto v = load_csv_file(fname);
   int i=0;
   std::for_each(v.begin(), v.end(), [&i](const std::string& x) {
@@ -195,7 +199,9 @@ save_int_value(std::string fname){
     val.push_back(std::to_string(I_Values[i]));
   }
   save_csv_file(fname, val);
+#if DEBUG
   std::cerr << "save_int_value: " << fname << std::endl;
+#endif
   return;
 }
 
@@ -206,7 +212,9 @@ save_float_value(std::string fname){
     val.push_back(std::to_string(F_Values[i]));
   }
   save_csv_file(fname, val);
+#if DEBUG
   std::cerr << "save_float_value: " << fname << std::endl;
+#endif
   return;
 }
 
@@ -307,6 +315,9 @@ get_variable_value(int32_t h, VARIANT *v)
     h = GET_HANDLE(h);
     v->vt = VT_I4;
     v->lVal = I_Values[h];
+#if DEBUG
+    std::cerr << "Gut I" << h << " = " <<v->lVal << std::endl;
+#endif
 
   }else if(h & F_VAL){
     h = GET_HANDLE(h);
@@ -344,7 +355,9 @@ put_variable_value(int32_t h, VARIANT v)
   if(h & I_VAL){
     h = GET_HANDLE(h);
     I_Values[h]=v.lVal;
+#if DEBUG
     std::cerr << "Put I" << h << " = " <<v.lVal << std::endl;
+#endif
 
   }else if(h & F_VAL){
     h = GET_HANDLE(h);

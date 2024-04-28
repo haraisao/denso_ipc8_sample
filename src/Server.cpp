@@ -6,24 +6,50 @@
 
 static int task_sleep_time=0;
 static int task_status=0;
+static int n_joints=6;
+static double joint_angles[]={0,0,30,0,0,0};
 
+time_t start_time;
 /***************/
 BSTR convToBstr(const std::string& input)
 {
+#if 0
   size_t i;
   wchar_t* buffer = new wchar_t[input.size()+1];
   mbstowcs(buffer, input.c_str(), input.size());
   return buffer;
+#else
+  wchar_t* chDest = NULL;
+  const char *chSrc = input.c_str();
+  int iLen = mbstowcs(NULL, chSrc, 0) + 1;
+  if(iLen > 0) {
+    chDest = (wchar_t*)malloc(sizeof(wchar_t)*iLen);
+    if(chDest == NULL) return NULL;
+    mbstowcs(chDest, chSrc, iLen);
+  }
+  return chDest;
+#endif
 }
 
 char *convToStr(BSTR bstr)
 {
+#if 0
   size_t i;
   std::wstring ws(bstr);
   char *buffer=new char[ws.length() +1];
   memset(buffer,0, ws.length() +1);
   wcstombs(buffer, ws.c_str(), ws.size());
   return buffer;
+#else
+  char* chDest = NULL;
+  int iLen = wcstombs(NULL, bstr, 0) + 1;
+   if(iLen > 0) {
+    chDest = (char*)malloc(iLen);
+    if(chDest == NULL) return NULL;
+    wcstombs(chDest, bstr, iLen);
+  }
+  return chDest;
+#endif
 }
 
 void msleep(int msec)
@@ -34,6 +60,12 @@ void msleep(int msec)
   sleep(sec);
   usleep(usec);
   return;
+}
+
+double get_current_time()
+{
+   int ct = time(NULL) - start_time;
+   return (double)ct*1000;
 }
 
 /**************/
@@ -130,8 +162,6 @@ ControllerGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return get_controller_variable_handle(&vntRet->lVal, vntArgs[1].bstrVal);
 }
 
-
-
 HRESULT
 ControllerGetTaskNames(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
@@ -214,9 +244,37 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 #if DEBUG
     std::cerr << "ExtSpeed:" << vntRet->fltVal << std::endl;
 #endif
-
+  }else if (cmd == "HighCurJntEx"){
+    double *pData;
+    vntRet->vt = VT_R8 | VT_ARRAY;
+    vntRet->parray = SafeArrayCreateVector(VT_R8, 0, 7);
+    SafeArrayAccessData(vntRet->parray, (void **) &pData);
+    pData[0] = get_current_time();
+    for(int i=1; i <= n_joints; i++){
+      pData[i] = joint_angles[i-1];
+    }
+   SafeArrayUnaccessData(vntRet->parray);
+  }else if (cmd == "slvMove"){
+    if (Argc == 3){
+      double *pData;
+      if(vntArgs[2].vt == VT_R8 | VT_ARRAY){
+        SafeArrayAccessData(vntArgs[2].parray, (void **) &pData);
+	for(int i=0;i<7;i++){
+          joint_angles[i] = pData[i];
+	}
+        SafeArrayUnaccessData(vntArgs[2].parray);
+      }
+      vntRet->vt = VT_R8 | VT_ARRAY;
+      vntRet->parray = SafeArrayCreateVector(VT_R8, 0, n_joints+2);
+      SafeArrayAccessData(vntRet->parray, (void **) &pData);
+      pData[0] = get_current_time();
+      for(int i=0; i < n_joints; i++){
+        pData[i] = joint_angles[i];
+      }
+      SafeArrayUnaccessData(vntRet->parray);
+    }
   }else{
-    std::cerr << "RobotExecute:"  <<cmd << std::endl;
+    std::cerr << ">>> RobotExecute:"  <<cmd << std::endl;
   }
   return S_OK;
 }
@@ -482,10 +540,12 @@ SetCallFunctions()
 
 /*****/
 int fd = 0;
+int fd1 = 0;
 
 void sig_handler(int signum) {
   fprintf(stderr, "==== Catch Signal Ctrl-C\n");
   bCap_Close_Server(&fd);
+  bCap_Close_Server(&fd1);
   return;
 }
 
@@ -497,6 +557,7 @@ int
 main(void)
 {
   HRESULT hr;
+  start_time = time(NULL);
 
   if (signal(SIGINT, sig_handler) == SIG_ERR) {
      std::cerr << "===== Signal Error =====" << std::endl;
@@ -519,8 +580,9 @@ main(void)
   LoadTaskList();
 
   hr = bCap_Open_Server("tcp", 1000, &fd);
+  hr = bCap_Open_Server("udp", 1000, &fd1);
   if (SUCCEEDED(hr)) {
-    while(fd){
+    while(fd && fd1){
       usleep(300000);
     }
   }

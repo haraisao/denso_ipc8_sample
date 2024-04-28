@@ -49,7 +49,8 @@ VARIANT ControllerValues[]={
    //{VT_BSTR, .bstrVal=ErrorCode},
    {VT_BSTR, 0},
    {VT_BSTR, 0}, {VT_BOOL, 0},
-   {VT_BOOL, 0}, {VT_BOOL, 1}, {VT_BSTR, 0}, {VT_BSTR, 0}, {VT_BSTR, 0}, 
+   {VT_BOOL, 0}, {VT_BOOL, 1}, {VT_BSTR, .bstrVal=L"DENSO CORPORATION"},
+   {VT_BSTR, .bstrVal=L"RC8 Controller"}, {VT_BSTR, .bstrVal=L"8"}, 
    {VT_BSTR, 0}, {VT_BOOL, 0} 
  };
 
@@ -79,7 +80,7 @@ std::map<std::wstring, int> ControllerVariables={
   { L"@ERROR_CODE", 17 }, { L"@ERROR_CODE_HEX",18},
   { L"@ERROR_DESCRIPTION", 19}, { L"@EMERGENCY_STOP", 20},
   { L"@DEADMAN_SW", 21}, { L"@AUTO_ENABLE", 22},
-  { L"@MAKER_NAME", 23}, { L"@TYPE", 24}, { L"@VARSION", 25},
+  { L"@MAKER_NAME", 23}, { L"@TYPE", 24}, { L"@VERSION", 25},
   { L"@SERIAL_NO", 26}, { L"@PROTECTIVE_STOP", 27}
 };
 
@@ -218,18 +219,27 @@ save_float_value(std::string fname){
   return;
 }
 
-wchar_t* convToWString(const std::string& in)
-{
+wchar_t* 
+convToWString(const std::string& in) {
   wchar_t* buffer = new wchar_t[in.size() +1];
   mbstowcs(buffer, in.c_str(), in.size());
   return buffer;
 }
 
-wchar_t *intToWstring(int v)
-{
+wchar_t *
+intToWstring(int v) {
   std::ostringstream ss;
   ss << std::setw(8) << std::setfill('0') << std::hex << v;
   return convToWString(ss.str());
+}
+ 
+std::string
+convString(const std::wstring& input) {
+  char* buffer = new char[input.size() + 1];
+  wcstombs(buffer, input.c_str(), input.size());
+  std::string result = buffer;
+  delete[] buffer;
+  return result;
 }
 
 /**************************************/
@@ -238,6 +248,8 @@ get_controller_variable_handle(int32_t *handle, BSTR bstr)
 {
   int32_t val;
   std::wstring name(bstr);
+
+  std::cerr << "----" << convString(name) << std::endl;
 
   if(name.compare(0,1, L"@")==0){
     auto it = ControllerVariables.find(name);
@@ -259,7 +271,7 @@ get_controller_variable_handle(int32_t *handle, BSTR bstr)
 
   }else if(name.compare(0,1, L"F")==0){
     try{
-      val=std::stoi(name.substr(1));
+      val=std::stof(name.substr(1));
       val |= F_VAL;
     }catch(...){
       std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
@@ -267,8 +279,8 @@ get_controller_variable_handle(int32_t *handle, BSTR bstr)
       return -1;
     }
   }
-  *handle = val;
 
+  *handle = val;
   return S_OK;
 }
 

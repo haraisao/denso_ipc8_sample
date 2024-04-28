@@ -199,7 +199,7 @@ print_variant(VARIANT *vnt, int depth)
 void
 print_args(const char *chName, VARIANT *vntArgs, int16_t Argc)
 {
-#if 0
+#ifdef DEBUG_ARGS
   int16_t i;
   printf("%s\n", chName);
   for (i = 0; i < Argc; i++) {

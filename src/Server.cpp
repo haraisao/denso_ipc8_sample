@@ -219,7 +219,6 @@ ControllerExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   return S_OK;
 }
 
-
 HRESULT
 RobotGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
@@ -259,9 +258,9 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
       double *pData;
       if(vntArgs[2].vt == VT_R8 | VT_ARRAY){
         SafeArrayAccessData(vntArgs[2].parray, (void **) &pData);
-	for(int i=0;i<7;i++){
+	      for(int i=0;i<7;i++){
           joint_angles[i] = pData[i];
-	}
+      	}
         SafeArrayUnaccessData(vntArgs[2].parray);
       }
       vntRet->vt = VT_R8 | VT_ARRAY;
@@ -272,6 +271,8 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
         pData[i] = joint_angles[i];
       }
       SafeArrayUnaccessData(vntRet->parray);
+    } else {
+      return E_FAIL;
     }
   }else{
     std::cerr << ">>> RobotExecute:"  <<cmd << std::endl;
@@ -308,7 +309,6 @@ TaskGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   vntRet->lVal = 13L;
 
   return get_task_variable_handle(&vntRet->lVal, vntArgs[1].bstrVal);
-
 }
 
 HRESULT

@@ -156,7 +156,11 @@ load_int_value(std::string fname)
   int i=0;
   std::for_each(v.begin(), v.end(), [&i](const std::string& x) {
     if (i < 100){
-      I_Values[i++] = std::stoi(x);
+      try {
+        I_Values[i++] = std::stoi(x);
+      } catch(...){
+        I_Values[i++] = 0;
+      }
     }
   });
   return;
@@ -221,9 +225,15 @@ save_float_value(std::string fname){
 
 wchar_t* 
 convToWString(const std::string& in) {
-  wchar_t* buffer = new wchar_t[in.size() +1];
-  mbstowcs(buffer, in.c_str(), in.size());
-  return buffer;
+  wchar_t* chDest = NULL;
+  const char *chSrc = in.c_str();
+  int iLen = mbstowcs(NULL, chSrc, 0) + 1;
+  if(iLen > 0) {
+    chDest = (wchar_t*)malloc(sizeof(wchar_t)*iLen);
+    if(chDest == NULL) return NULL;
+    mbstowcs(chDest, chSrc, iLen);
+  }
+  return chDest;
 }
 
 wchar_t *
@@ -234,12 +244,15 @@ intToWstring(int v) {
 }
  
 std::string
-convString(const std::wstring& input) {
-  char* buffer = new char[input.size() + 1];
-  wcstombs(buffer, input.c_str(), input.size());
-  std::string result = buffer;
-  delete[] buffer;
-  return result;
+convString(BSTR bstr) {
+  char* chDest = NULL;
+  int iLen = wcstombs(NULL, bstr, 0) + 1;
+   if(iLen > 0) {
+    chDest = (char*)malloc(iLen);
+    if(chDest == NULL) return NULL;
+    wcstombs(chDest, bstr, iLen);
+  }
+  return chDest;
 }
 
 /**************************************/
@@ -247,39 +260,43 @@ HRESULT
 get_controller_variable_handle(int32_t *handle, BSTR bstr)
 {
   int32_t val;
-  std::wstring name(bstr);
+  std::string name = convString(bstr);
+  std::cerr << "----" << name << std::endl;
 
-  std::cerr << "----" << convString(name) << std::endl;
-
-  if(name.compare(0,1, L"@")==0){
-    auto it = ControllerVariables.find(name);
+  if(name.compare(0, 1, "@")==0){
+    std::wstring name1(bstr);
+    auto it = ControllerVariables.find(name1);
     if (it != ControllerVariables.end()){
       val = it->second | CTRL_VAL;
     }else{
       return (HRESULT)(-1); 
     }
 
-  }else if(name.compare(0,1, L"I")==0){
+  }else if(name.compare(0,1, "I") == 0){
+    val = 0;
     try{
-      val=std::stoi(name.substr(1));
+      if(isdigit(name[1])){
+        val=std::stoi(name.substr(1));
+      }
       //val |= I_VAL;
     }catch(...){
-      std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
-	       << std::endl;
+      //std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
+      std::cerr << "===ERROR in get_variable_handle " << name << std::endl;
       //return -1;
-      val = 0;
     }
     val |= I_VAL;
 
-  }else if(name.compare(0,1, L"F")==0){
+  }else if(name.compare(0,1, "F")==0){
+    val = 0;
     try{
-      val=std::stof(name.substr(1));
+      if(isdigit(name[1])){
+        val=std::stof(name.substr(1));
+      }
       //val |= F_VAL;
     }catch(...){
-      std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
-	      << std::endl;
+      //std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
+      std::cerr << "===ERROR in get_variable_handle " << name << std::endl;
       //return -1;
-      val = 0;
     }
     val |= F_VAL;
   }

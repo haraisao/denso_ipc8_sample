@@ -64,7 +64,7 @@ GetTaskNames(std::string path)
     std::vector<std::string>lst;
     DIR *dp;
     dp = opendir(path.c_str());
-    if(dp==NULL) { return lst; }
+    if(dp == NULL) { return lst; }
     dirent * entry = readdir(dp);
     while (entry != NULL){
         if(entry != NULL){

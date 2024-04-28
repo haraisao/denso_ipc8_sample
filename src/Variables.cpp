@@ -262,22 +262,26 @@ get_controller_variable_handle(int32_t *handle, BSTR bstr)
   }else if(name.compare(0,1, L"I")==0){
     try{
       val=std::stoi(name.substr(1));
-      val |= I_VAL;
+      //val |= I_VAL;
     }catch(...){
       std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
 	       << std::endl;
-      return -1;
+      //return -1;
+      val = 0;
     }
+    val |= I_VAL;
 
   }else if(name.compare(0,1, L"F")==0){
     try{
       val=std::stof(name.substr(1));
-      val |= F_VAL;
+      //val |= F_VAL;
     }catch(...){
       std::cerr << "===ERROR in get_variable_handle " << ConvertWstringToUTF8(name)
 	      << std::endl;
-      return -1;
+      //return -1;
+      val = 0;
     }
+    val |= F_VAL;
   }
 
   *handle = val;

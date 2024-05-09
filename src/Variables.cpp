@@ -54,8 +54,14 @@ VARIANT ControllerValues[]={
    {VT_BSTR, 0}, {VT_BOOL, 0} 
  };
 
+static double current_pos[]={0,0,0,0,0,0};
+static SAFEARRAY CurrentPosition={ 1, VT_R8, 6, current_pos, {0, 6}};
+static double current_angle[]={0,0,0,0,0,0};
+static SAFEARRAY CurrentAngle={ 1, VT_R8, 6, current_angle, {0, 6}};
+
 VARIANT RobotValues[]={
-   {0, 0}, {VT_ARRAY|VT_R8, 0}, {VT_ARRAY|VT_R8, 0},
+   {0, 0},
+   {VT_ARRAY|VT_R8, .parray = &CurrentPosition}, {VT_ARRAY|VT_R8, .parray = &CurrentAngle},
    {VT_BOOL, 0}, {VT_BOOL, 0}, {VT_BSTR, 0}, {VT_I4, 0},
    {VT_ARRAY|VT_R8, 0}, {VT_I4, 0}, {VT_I4, 0}, {VT_R4, 0},
    {VT_R4, 0}, {VT_R4, 0}, {VT_R4, 0}, {VT_R4, 0}, {VT_R4, 0},
@@ -344,6 +350,7 @@ get_task_variable_handle(int32_t *handle, BSTR bstr)
 void
 get_variable_value(int32_t h, VARIANT *v)
 {
+  std::cerr << "Gut variable " << h << std::endl;
   if(h & I_VAL){
     h = GET_HANDLE(h);
     v->vt = VT_I4;
@@ -359,7 +366,7 @@ get_variable_value(int32_t h, VARIANT *v)
 
   }else if(h & CTRL_VAL){
     h = GET_HANDLE(h);
-
+    std::cerr << "Gut control variable " << h << std::endl;
     if (h == 18){
       int code = (ControllerValues+17)->lVal;
       v->vt = VT_BSTR;
@@ -370,10 +377,12 @@ get_variable_value(int32_t h, VARIANT *v)
 
   }else if(h & ROBOT_VAL){
     h = GET_HANDLE(h);
+    std::cerr << "Gut robot variable " << h << std::endl;
     VariantCopy(v, RobotValues+h);
 
   }else if(h & TASK_VAL){
     h = GET_HANDLE(h);
+    std::cerr << "Gut task variable " << h << std::endl;
     VariantCopy(v, TaskValues+h);
 
   }else{
@@ -385,6 +394,7 @@ get_variable_value(int32_t h, VARIANT *v)
 void
 put_variable_value(int32_t h, VARIANT v)
 {
+  std::cerr << "Put variable " << h << std::endl;
   if(h & I_VAL){
     h = GET_HANDLE(h);
     I_Values[h]=v.lVal;
@@ -410,8 +420,6 @@ put_variable_value(int32_t h, VARIANT v)
       VARIANT val2 = {VT_BSTR, 0};
       VariantCopy(ControllerValues+19, &val2);
     }
-   
-
   }else if(h & ROBOT_VAL){
     h = GET_HANDLE(h);
     VariantCopy(RobotValues+h, &v);
@@ -421,5 +429,19 @@ put_variable_value(int32_t h, VARIANT v)
     VariantCopy(TaskValues+h, &v);
 
   }
+  return;
+}
+
+int32_t
+get_error_value()
+{
+ VARIANT val = ControllerValues[ControllerVariables[L"@ERROR_CODE"]];
+ return val.lVal;
+}
+
+void
+put_error_value(int32_t val)
+{
+  ControllerValues[ControllerVariables[L"@ERROR_CODE"]].lVal = val;
   return;
 }

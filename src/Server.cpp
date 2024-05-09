@@ -231,6 +231,13 @@ RobotGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 
 }
 
+/**
+ *  slvMove: 
+ *    S_OK：　0x00000000
+ *    指令値生成遅延：　0x84291482
+ *    S_BUF_FULL, バッファフル：　0x0F200501
+ *    E_BUF_FULL, バッファオーバーフロー：　0x83201483
+ */
 HRESULT
 RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
@@ -254,7 +261,14 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
     }
    SafeArrayUnaccessData(vntRet->parray);
   }else if (cmd == "slvMove"){
-    if (Argc == 3){
+#if 1
+    int32_t err = get_error_value();
+    if (err > 0){
+      std::cerr << "ERROR :" << err << std::endl;
+      return err;
+    }
+#endif
+    if (Argc == 3) {
       double *pData;
       if(vntArgs[2].vt == VT_R8 | VT_ARRAY){
         SafeArrayAccessData(vntArgs[2].parray, (void **) &pData);
@@ -271,6 +285,7 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
         pData[i] = joint_angles[i];
       }
       SafeArrayUnaccessData(vntRet->parray);
+      usleep(6800);
     } else {
       return E_FAIL;
     }

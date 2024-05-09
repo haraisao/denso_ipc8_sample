@@ -45,6 +45,8 @@ void load_int_value(std::string fname);
 void save_int_value(std::string fname);
 void load_float_value(std::string fname);
 void save_float_value(std::string fname);
+int32_t get_error_value();
+void put_error_value(int32_t val);
 
 /** PrintVariant***/
 void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);

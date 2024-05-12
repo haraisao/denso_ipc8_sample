@@ -12,12 +12,11 @@
 #include <locale>
 #include <codecvt>
 
-#define GET_HANDLE(h)    (h & 0x0ff)
 
 /*
  * Variables
  */
-int32_t I_Values[100]={
+int32_t I_Values[MAX_N_VALS]={
     0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,
@@ -29,13 +28,12 @@ int32_t I_Values[100]={
     0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0};
 
-float F_Values[100]={
+float F_Values[MAX_N_VALS]={
 	  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 BSTR ErrorCode=L"00000000";
 
@@ -54,16 +52,28 @@ VARIANT ControllerValues[]={
    {VT_BSTR, 0}, {VT_BOOL, 0} 
  };
 
-static double current_pos[]={0,0,0,0,0,0};
-static SAFEARRAY CurrentPosition={ 1, VT_R8, 6, current_pos, {0, 6}};
-static double current_angle[]={0,0,0,0,0,0};
-static SAFEARRAY CurrentAngle={ 1, VT_R8, 6, current_angle, {0, 6}};
+static double current_pos[N_P_TYPE]={0,0,0,0,0,0,0};
+static SAFEARRAY CurrentPosition={1, VT_R8, N_P_TYPE, current_pos, {0, N_P_TYPE}};
+static double current_angle[N_J_TYPE]={0,0,0,0,0,0,0,0};
+static SAFEARRAY CurrentAngle={ 1, VT_R8, N_J_TYPE, current_angle, {0, N_J_TYPE}};
+
+static double current_trans[N_T_TYPE]={0,0,0,0,0,0,0,0,0,0};
+static SAFEARRAY CurrentTrans={ 1, VT_R8, N_T_TYPE, current_trans, {0, N_T_TYPE}};
+
+/**
+HIGH_CURRENT_POSITION
+HIGH_CURRENT_ANGLE
+HIGH_CURRENT_TRANS
+DEST_ANGLE
+DEST_POSITION
+DEST_TRANS
+*/
 
 VARIANT RobotValues[]={
    {0, 0},
    {VT_ARRAY|VT_R8, .parray = &CurrentPosition}, {VT_ARRAY|VT_R8, .parray = &CurrentAngle},
    {VT_BOOL, 0}, {VT_BOOL, 0}, {VT_BSTR, 0}, {VT_I4, 0},
-   {VT_ARRAY|VT_R8, 0}, {VT_I4, 0}, {VT_I4, 0}, {VT_R4, 0},
+   {VT_ARRAY|VT_R8, .parray = &CurrentTrans}, {VT_I4, 0}, {VT_I4, 0}, {VT_R4, 0},
    {VT_R4, 0}, {VT_R4, 0}, {VT_R4, 0}, {VT_R4, 0}, {VT_R4, 0},
    {VT_R4, .fltVal=10}, {VT_R4, 0}, {VT_R4, 0},
    {VT_ARRAY|VT_R8, 0}, {VT_ARRAY|VT_R8, 0}, {VT_ARRAY|VT_R8, 0},
@@ -261,6 +271,29 @@ convString(BSTR bstr) {
   return chDest;
 }
 
+void compute_fk(double joints[N_AXIS])
+{
+  double x=0, y=0, z=0, roll=0, pitch=0, yew=0;
+/**
+ * COBOTTA: [X,Y,Z], [R,P,Y]
+ *   J1(Z): [0,0,0], [0,0,0]
+ *   J2(Y): [0,0,0.18], [0,0,0]
+ *   J3(Y): [0,0,0.165], [0,0,0]
+ *   J4(Z): [-0.012,0.02,-0.345], [0,0,0]
+ *   J5(Y): [0,-0.02,0.5225], [0,0,0]
+ *   J6(Z): [0,-0.0445,0.042], [0,0,0]
+*/
+
+
+
+  current_pos[0]=x;
+  current_pos[1]=y;
+  current_pos[2]=z;
+  current_pos[3]=roll;
+  current_pos[4]=pitch;
+  current_pos[5]=yew;
+  return;
+}
 /**************************************/
 HRESULT
 get_controller_variable_handle(int32_t *handle, BSTR bstr)
@@ -432,6 +465,7 @@ put_variable_value(int32_t h, VARIANT v)
   return;
 }
 
+/************************/
 int32_t
 get_error_value()
 {
@@ -445,3 +479,11 @@ put_error_value(int32_t val)
   ControllerValues[ControllerVariables[L"@ERROR_CODE"]].lVal = val;
   return;
 }
+
+void put_joint_values(double *joints)
+{
+  memcpy(current_angle, joints,sizeof(double) * N_AXIS);
+  compute_fk(joints);
+  return;
+}
+

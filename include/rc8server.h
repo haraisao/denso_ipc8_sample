@@ -26,6 +26,14 @@
 #include "bCAPServer/bcap_server.h"
 #endif
 
+#define GET_HANDLE(h)    (h & 0x0ff)
+#define MAX_N_VALS      100
+#define N_AXIS          6
+#define N_V_TYPE        3
+#define N_P_TYPE        7
+#define N_J_TYPE        8
+#define N_T_TYPE        10
+
 enum{
   I_VAL=0x100,
   F_VAL=0x200,
@@ -47,6 +55,7 @@ void load_float_value(std::string fname);
 void save_float_value(std::string fname);
 int32_t get_error_value();
 void put_error_value(int32_t val);
+void put_joint_values(double *joints);
 
 /** PrintVariant***/
 void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);

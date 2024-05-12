@@ -212,6 +212,9 @@ ControllerExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
     vntRet->vt = VT_I4;
     vntRet->lVal = 0L;
 
+  }else if (cmd == "ClearError"){
+    put_error_value(0);
+
   }else{
     std::cerr << "ControllerExecute:" <<  cmd << std::endl;
   }
@@ -228,7 +231,6 @@ RobotGetVariable(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
   vntRet->lVal = 12L;
 
   return get_robot_variable_handle(&vntRet->lVal, vntArgs[1].bstrVal);
-
 }
 
 /**
@@ -286,6 +288,9 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
       }
       SafeArrayUnaccessData(vntRet->parray);
       usleep(6800);
+
+      put_joint_values(pData);
+
     } else {
       return E_FAIL;
     }

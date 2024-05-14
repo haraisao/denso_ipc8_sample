@@ -6,6 +6,7 @@ project(rc8server)
 add_compile_options( -Wno-write-strings -fcompare-debug-second -g)
 
 find_package(yaml-cpp REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orin_bcap.cmake)
 message("ORIN_SERVER_LIB: ${ORIN_SERVER_LIBRARIES}")
@@ -29,6 +30,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
 	${ORIN_SERVER_LIBRARIES}
 	${YAML_CPP_LIBRARIES}
+  Eigen3::Eigen
 )
 
 #

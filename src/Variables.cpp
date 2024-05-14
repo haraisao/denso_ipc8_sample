@@ -12,6 +12,11 @@
 #include <locale>
 #include <codecvt>
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
+#define Deg2Rad(x) x*3.1415926575/180.0
+#define Rad2Deg(x) x/3.1415926575*180.0
 
 /*
  * Variables
@@ -283,24 +288,54 @@ void compute_fk(double joints[N_AXIS])
  *   J5(Y): [0,-0.02,0.5225], [0,0,0]
  *   J6(Z): [0,-0.0445,0.042], [0,0,0]
 */
+#if 1
+  Eigen::Matrix3d rot;
+  rot = Eigen::AngleAxisd(Deg2Rad(joints[0]), Eigen::Vector3d::UnitZ())
+             * Eigen::AngleAxisd(Deg2Rad(joints[1]), Eigen::Vector3d::UnitY())
+             * Eigen::AngleAxisd(Deg2Rad(joints[2]), Eigen::Vector3d::UnitY())
+             * Eigen::AngleAxisd(Deg2Rad(joints[3]), Eigen::Vector3d::UnitZ())
+             * Eigen::AngleAxisd(Deg2Rad(joints[4]), Eigen::Vector3d::UnitY())
+             * Eigen::AngleAxisd(Deg2Rad(joints[5]), Eigen::Vector3d::UnitZ());
+  Eigen::Vector3d rpy = rot.eulerAngles(2,1,0);
+  Eigen::Vector3d v2(0, 0, 0.18);
+  Eigen::Vector3d v3(0, 0, 0.165);
+  Eigen::Vector3d v4(-0.012, 0.02, -0.345);
+  Eigen::Vector3d v5(0, -0.02, 0.5225);
+  Eigen::Vector3d v6(0, -0.0445, 0.042);
+  Eigen::Vector3d pos_;
 
+  pos_ = Eigen::AngleAxisd(Deg2Rad(joints[4]), Eigen::Vector3d::UnitY()) * v6 + v5;
+  pos_ = Eigen::AngleAxisd(Deg2Rad(joints[3]), Eigen::Vector3d::UnitZ()) * pos_ + v4;
+  pos_ = Eigen::AngleAxisd(Deg2Rad(joints[2]), Eigen::Vector3d::UnitY()) * pos_ + v3;
+  pos_ = Eigen::AngleAxisd(Deg2Rad(joints[1]), Eigen::Vector3d::UnitY()) * pos_ + v2;
+  pos_ = Eigen::AngleAxisd(Deg2Rad(joints[0]), Eigen::Vector3d::UnitZ()) * pos_ *100;
 
-
-  current_pos[0]=x;
-  current_pos[1]=y;
-  current_pos[2]=z;
-  current_pos[3]=roll;
-  current_pos[4]=pitch;
-  current_pos[5]=yew;
+  current_pos[0]=pos_[0];
+  current_pos[1]=pos_[1];
+  current_pos[2]=pos_[2];
+  current_pos[3]=rpy[2];
+  current_pos[4]=rpy[1];
+  current_pos[5]=rpy[0];
+#endif
   return;
 }
+
+void update_current_pose()
+{
+  compute_fk(current_angle);
+  return;
+}
+
 /**************************************/
 HRESULT
 get_controller_variable_handle(int32_t *handle, BSTR bstr)
 {
   int32_t val;
   std::string name = convString(bstr);
-  std::cerr << "----" << name << std::endl;
+  //std::cerr << "----" << name << std::endl;
+  if (name == "@CURRENT_POSITION"){
+    update_current_pose();
+  }
 
   if(name.compare(0, 1, "@")==0){
     std::wstring name1(bstr);
@@ -483,7 +518,7 @@ put_error_value(int32_t val)
 void put_joint_values(double *joints)
 {
   memcpy(current_angle, joints,sizeof(double) * N_AXIS);
-  compute_fk(joints);
+  //compute_fk(joints);
   return;
 }
 

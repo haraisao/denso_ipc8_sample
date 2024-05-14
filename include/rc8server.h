@@ -56,6 +56,7 @@ void save_float_value(std::string fname);
 int32_t get_error_value();
 void put_error_value(int32_t val);
 void put_joint_values(double *joints);
+void update_current_pose();
 
 /** PrintVariant***/
 void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);

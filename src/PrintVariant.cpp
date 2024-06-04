@@ -65,7 +65,7 @@ print_variant(VARIANT *vnt, int depth)
         break;
       case VT_CY:
         for (i = 0; i <= (ub - lb); i++) {
-          printf("%lld", ((CY *) pData + i)->int64);
+          printf("%ld", ((CY *) pData + i)->int64);
           if (i != (ub - lb))
             printf(", ");
         }
@@ -157,7 +157,7 @@ print_variant(VARIANT *vnt, int depth)
         printf("%lf", vnt->dblVal);
         break;
       case VT_CY:
-        printf("%lld", vnt->cyVal.int64);
+        printf("%ld", vnt->cyVal.int64);
         break;
       case VT_DATE:
 #ifdef _MSC_VER

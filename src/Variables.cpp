@@ -418,13 +418,15 @@ get_task_variable_handle(int32_t *handle, BSTR bstr)
 void
 get_variable_value(int32_t h, VARIANT *v)
 {
-  std::cerr << "Gut variable " << h << std::endl;
+#if DEBUG
+  std::cerr << "Get variable " << h << std::endl;
+#endif
   if(h & I_VAL){
     h = GET_HANDLE(h);
     v->vt = VT_I4;
     v->lVal = I_Values[h];
 #if DEBUG
-    std::cerr << "Gut I" << h << " = " <<v->lVal << std::endl;
+    std::cerr << "Get I" << h << " = " <<v->lVal << std::endl;
 #endif
 
   }else if(h & F_VAL){
@@ -434,7 +436,9 @@ get_variable_value(int32_t h, VARIANT *v)
 
   }else if(h & CTRL_VAL){
     h = GET_HANDLE(h);
-    std::cerr << "Gut control variable " << h << std::endl;
+#if DEBUG
+    std::cerr << "Get control variable " << h << std::endl;
+#endif
     if (h == 18){
       int code = (ControllerValues+17)->lVal;
       v->vt = VT_BSTR;
@@ -445,12 +449,16 @@ get_variable_value(int32_t h, VARIANT *v)
 
   }else if(h & ROBOT_VAL){
     h = GET_HANDLE(h);
-    std::cerr << "Gut robot variable " << h << std::endl;
+#if DEBUG
+    std::cerr << "Get robot variable " << h << std::endl;
+#endif
     VariantCopy(v, RobotValues+h);
 
   }else if(h & TASK_VAL){
     h = GET_HANDLE(h);
-    std::cerr << "Gut task variable " << h << std::endl;
+#if DEBUG
+    std::cerr << "Get task variable " << h << std::endl;
+#endif
     VariantCopy(v, TaskValues+h);
 
   }else{
@@ -462,7 +470,9 @@ get_variable_value(int32_t h, VARIANT *v)
 void
 put_variable_value(int32_t h, VARIANT v)
 {
+#if DEBUG
   std::cerr << "Put variable " << h << std::endl;
+#endif
   if(h & I_VAL){
     h = GET_HANDLE(h);
     I_Values[h]=v.lVal;

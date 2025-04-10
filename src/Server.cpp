@@ -68,6 +68,54 @@ double get_current_time()
    return (double)ct*1000;
 }
 
+int
+get_int_value_from_variant(VARIANT *vnt, int *val){
+  int ret = 0;
+  if (vnt->vt == VT_I2){
+    *val = vnt->iVal;
+  } else if (vnt->vt == VT_I4) {
+     *val = vnt->lVal;
+  } else if (vnt->vt == VT_I8) {
+     *val = vnt->llVal;
+  } else if (vnt->vt == VT_BOOL) {
+     *val = vnt->boolVal;
+  } else if (vnt->vt == VT_ERROR) {
+     *val = vnt->scode;
+  } else if (vnt->vt == VT_UI1) {
+     *val = vnt->bVal;
+  } else if (vnt->vt == VT_UI2) {
+     *val = vnt->uiVal;
+  } else if (vnt->vt == VT_UI4) {
+     *val = vnt->ulVal;
+  } else if (vnt->vt == VT_UI8) {
+     *val = vnt->ullVal;
+  } else{
+    ret = -1;
+  }
+  return ret;
+}
+
+int
+get_double_value_from_variant(VARIANT *vnt, double *val){
+  int ret = 0;
+  if (vnt->vt == VT_R4){
+    *val = vnt->fltVal;
+  } else if (vnt->vt == VT_R8) {
+     *val = vnt->dblVal;
+  } else{
+    ret = -1;
+  }
+  return ret;
+}
+
+int
+bstr_comp(VARIANT *vnt, const wchar_t *s){
+  if (vnt->vt == VT_BSTR){
+    return wcscmp(vnt->bstrVal, s);
+  }
+  return -1;
+}
+
 /**************/
 HRESULT
 ServiceStart(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
@@ -274,7 +322,7 @@ RobotExecute(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
       double *pData;
       if(vntArgs[2].vt == VT_R8 | VT_ARRAY){
         SafeArrayAccessData(vntArgs[2].parray, (void **) &pData);
-	      for(int i=0;i<7;i++){
+	      for(int i=0;i<N_AXIS;i++){
           joint_angles[i] = pData[i];
       	}
         SafeArrayUnaccessData(vntArgs[2].parray);
@@ -304,9 +352,39 @@ HRESULT
 RobotMove(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
 {
   print_args("RobotMove", vntArgs, Argc);
-  // T.B.D
-  std::cerr << "RobotMove:" << std::endl;
 
+  int comp;
+  if (get_int_value_from_variant(&vntArgs[1], &comp) < 0){
+    std::cerr << "RobotMove: Invalid Comp..." << std::endl;
+  };
+  std::cerr << "RobotMove:" << std::endl;
+  if (vntArgs[2].vt = (VT_ARRAY | VT_VARIANT)){
+    
+    void *pData;
+    SafeArrayAccessData(vntArgs[2].parray, &pData);
+    if (bstr_comp((VARIANT *)pData+1, L"J") == 0){
+      double *data;
+      VARIANT *vnt = (VARIANT *)pData;
+      if(vnt->vt == VT_R8 | VT_ARRAY){
+        SafeArrayAccessData(vnt->parray, (void **) &data);
+        std::cerr << "  J:";
+	      for(int i=0;i<6;i++){
+          joint_angles[i] = data[i];
+          std::cerr << data[i] << " ";
+      	}
+        std::cerr << std::endl;
+        SafeArrayUnaccessData(vnt->parray);
+        usleep(6800);
+        put_joint_values(data);
+      }
+    }else{
+      print_variant(&vntArgs[2], 1);
+      print_variant((VARIANT *)pData+1, 1);
+      print_variant((VARIANT *)pData+2, 1);
+    }
+  }else{
+    print_args2("RobotMove", vntArgs, Argc);
+  }
   return S_OK;
 }
 

@@ -60,7 +60,8 @@ void update_current_pose();
 
 /** PrintVariant***/
 void print_args(const char *chName, VARIANT *vntArgs, int16_t Argc);
-
+void print_args2(const char *chName, VARIANT *vntArgs, int16_t Argc);
+void print_variant(VARIANT *vnt, int depth);
 /** file System*/
 std::vector<std::string> GetTaskNames(std::string path);
 //int ReadTaskTime(std::string name);

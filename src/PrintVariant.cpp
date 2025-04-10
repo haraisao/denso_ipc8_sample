@@ -212,3 +212,16 @@ print_args(const char *chName, VARIANT *vntArgs, int16_t Argc)
   return;
 #endif
 }
+
+void
+print_args2(const char *chName, VARIANT *vntArgs, int16_t Argc)
+{
+  int16_t i;
+  printf("%s\n", chName);
+  for (i = 0; i < Argc; i++) {
+    printf("Arg[%d]\n", i + 1);
+    print_variant(&vntArgs[i], 1);
+  }
+  printf("\n");
+  return;
+}

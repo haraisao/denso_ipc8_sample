@@ -367,14 +367,14 @@ RobotMove(VARIANT *vntArgs, int16_t Argc, VARIANT *vntRet)
       VARIANT *vnt = (VARIANT *)pData;
       if(vnt->vt == VT_R8 | VT_ARRAY){
         SafeArrayAccessData(vnt->parray, (void **) &data);
-        std::cerr << "  J:";
-	      for(int i=0;i<6;i++){
+        std::cerr << "  J: [";
+        for(int i=0;i<6;i++){
           joint_angles[i] = data[i];
-          std::cerr << data[i] << " ";
+          std::cerr << data[i] << ", ";
       	}
-        std::cerr << std::endl;
+        std::cerr << "]" << std::endl;
         SafeArrayUnaccessData(vnt->parray);
-        usleep(6800);
+        usleep(1000*100);
         put_joint_values(data);
       }
     }else{
